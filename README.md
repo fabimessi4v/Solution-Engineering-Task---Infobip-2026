@@ -5,10 +5,7 @@ Welcome to the official repository of the technical prototype and architecture s
 
 ---
 
-## 🌟 0. LIVE INTERACTIVE DEMO (NO INFOBIP CREDENTIALS REQUIRED)
 
-> **You do not need active cloud credentials or licenses to deliver an executive-level demonstration!**  
-> As a Senior Solutions Engineer, demonstrating the proposed architecture through this **Dual-Screen Interactive Simulator** proves technical autonomy, architectural mastery, and consultative storytelling.
 
 ### Quick Start in 1 Second:
 ```bash
@@ -91,14 +88,3 @@ curl -X POST https://banco-ib-cpf-validation.free.beeceptor.com/validate-cpf \
   -d '{"cpf": "52998224725", "channel": "WHATSAPP"}'
 ```
 
----
-
-## 📊 3. 30-Minute Interview Presentation Roadmap
-
-| Segment | Duration | Focus Area |
-|---|:---:|---|
-| **1. Business Context & Opening** | 5 min | Overview of Banco IB's challenges, high-level architecture, and Infobip's value proposition. |
-| **2. Live Solution Demo** | 10 min | Interactive walkthrough using the WhatsApp simulator: edge validation, Core API lookup, quick replies, and zero-loss handoff to the Customer 360 card. |
-| **3. Technical Deep Dive** | 10 min | Code walkthrough of `validateCPF.js`, Modulo 11 formula, and webhook integration. |
-| **4. Operational Analytics & SOW** | 5 min | Walkthrough of the Analytics dashboard (containment rate, CSAT, AHT) and the 8-week rollout Gantt chart. |
-| **5. Q&A Session** | 10 min | Interactive panel discussion addressing architectural and functional questions. |
