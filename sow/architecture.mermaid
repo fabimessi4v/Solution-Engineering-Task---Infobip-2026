@@ -1,0 +1,86 @@
+flowchart TD
+    %% ========================================================================
+    %% ARQUITECTURA DE SOLUCIÓN: BANCO IB - WHATSAPP CHATBOT & CORE INTEGRATION
+    %% Diseñado por: Infobip Solutions Engineering
+    %% ========================================================================
+
+    subgraph UserLayer["1. Canal de Comunicación del Usuario"]
+        User["📱 Usuario / Cliente"]
+        WA["💬 WhatsApp Business Platform\n(Meta Cloud API / Infobip BSP)"]
+        User <-->|"Mensajes interactivos y texto"| WA
+    end
+
+    subgraph InfobipAnswers["2. Motor Conversacional (Infobip Answers)"]
+        WebhookIn["Entrada de Mensaje"]
+        AskCPF["Solicitud de CPF"]
+        
+        subgraph LocalValidation["Validación Perimetral"]
+            RegexCheck{"¿Formato Regex Válido?\n(\\d{11} o \\d{3}.\\d{3}.\\d{3}-\\d{2})"}
+            Mod11Check{"¿Módulo 11 Válido?\n(Cálculo DV1 y DV2 en JS)"}
+            ErrorMsgCPF["Mensaje de Error:\n'CPF inválido, por favor reintente'"]
+        end
+
+        subgraph CoreAPIIntegration["Integración Core Bancario"]
+            CallBeeceptor["Llamada HTTP POST\n/v1/validate-cpf"]
+            EvalStatus{"¿Status == APPROVED?"}
+            ErrorCore["Notificación de Bloqueo / Inconsistencia"]
+        end
+
+        subgraph DataCollection["Recopilación y Confirmación"]
+            AskNameEmail["Solicitud de Nombre y Email"]
+            ConfirmButtons["Mensaje con Botones Rápidos:\n[Confirmar] [Modificar]"]
+            ModifyBranch{"Selección del Usuario"}
+        end
+
+        WA <--> WebhookIn
+        WebhookIn --> AskCPF
+        AskCPF --> RegexCheck
+        RegexCheck -- No --> ErrorMsgCPF --> AskCPF
+        RegexCheck -- Sí --> Mod11Check
+        Mod11Check -- No --> ErrorMsgCPF
+        Mod11Check -- Sí --> CallBeeceptor
+        
+        CallBeeceptor --> EvalStatus
+        EvalStatus -- "REJECTED / NOT_FOUND" --> ErrorCore
+        EvalStatus -- "APPROVED" --> AskNameEmail
+        
+        AskNameEmail --> ConfirmButtons
+        ConfirmButtons --> ModifyBranch
+        ModifyBranch -- "Modificar" --> AskNameEmail
+    end
+
+    subgraph BackendMock["3. Servicios Externos & Core Bancario"]
+        Beeceptor["🌐 Core Bancario Banco IB\n(Mock Beeceptor API)\nPOST /v1/validate-cpf"]
+        CallBeeceptor <-->|"JSON Payload\nScore, Tier, Account Status"| Beeceptor
+    end
+
+    subgraph InfobipCDP["4. Gestión de Datos de Cliente (Infobip People CDP)"]
+        PeopleCDP[("👤 Perfil Unificado\n- Teléfono (WhatsApp ID)\n- CPF validado\n- Nombre & Email\n- Tier (PREMIUM/STANDARD)\n- Credit Score")]
+        AskNameEmail -.->|"Actualiza atributos de contacto"| PeopleCDP
+    end
+
+    subgraph InfobipConversations["5. Contact Center Omnicanal (Infobip Conversations)"]
+        RoutingQueue["Enrutamiento Inteligente por Colas\n(Priorización por Tier PREMIUM)"]
+        AgentDesktop["🖥️ Bandeja del Agente Humano\n- Historial completo de conversación\n- Contexto enriquecido (CPF, Score, Email)"]
+        HumanAgent["👨‍💼 Agente de Atención Banco IB"]
+
+        ModifyBranch -- "Confirmar" --> RoutingQueue
+        RoutingQueue --> AgentDesktop
+        AgentDesktop <--> HumanAgent
+        AgentDesktop <-->|"Interacción bidireccional continua"| WA
+        PeopleCDP -.->|"Inyección de contexto en pantalla de agente"| AgentDesktop
+    end
+
+    subgraph Analytics["6. Analítica y Monitoreo"]
+        InfobipAnalytics["📊 Infobip Analytics Dashboard\n- Tasa de Contención del Bot\n- Tiempo Medio de Atención (TMA)\n- CSAT / Satisfacción\n- Embudo de conversión de onboarding"]
+        InfobipAnswers -.-> InfobipAnalytics
+        InfobipConversations -.-> InfobipAnalytics
+    end
+
+    classDef infobip fill:#fff3ed,stroke:#fc6423,stroke-width:2px,color:#1b1a19;
+    classDef external fill:#e8f4fd,stroke:#1b2f96,stroke-width:2px,color:#1b1a19;
+    classDef agent fill:#e6f9ed,stroke:#107c41,stroke-width:2px,color:#1b1a19;
+
+    class WebhookIn,AskCPF,RegexCheck,Mod11Check,ErrorMsgCPF,CallBeeceptor,EvalStatus,ErrorCore,AskNameEmail,ConfirmButtons,ModifyBranch,PeopleCDP,InfobipAnalytics infobip;
+    class User,WA,Beeceptor external;
+    class RoutingQueue,AgentDesktop,HumanAgent agent;

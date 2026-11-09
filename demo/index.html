@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banco IB & Infobip - Interactive Solution Simulator</title>
+  <style>
+    :root {
+      --primary-orange: #fc6423;
+      --primary-dark: #1b1a19;
+      --secondary-blue: #1b2f96;
+      --wa-green: #25D366;
+      --wa-dark-green: #075E54;
+      --wa-chat-bg: #efeae2;
+      --wa-bubble-in: #ffffff;
+      --wa-bubble-out: #d9fdd3;
+      --bg-gray: #f4f5f7;
+      --border-gray: #e0e3e8;
+      --text-main: #2b303a;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-gray);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      background: transparent;
+      border-bottom: 1px solid var(--border-gray);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: none;
+      z-index: 100;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: transparent;
+    }
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+    }
+    .brand-badge svg {
+      height: 28px;
+      width: 95px;
+      min-width: 95px;
+      max-width: 95px;
+      flex-shrink: 0;
+      display: block;
+      background: transparent;
+    }
+    .divider-v {
+      height: 24px;
+      width: 1px;
+      background: var(--border-gray);
+    }
+    .header-title {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+    .header-title strong {
+      color: var(--primary-dark);
+    }
+    .header-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      border: 1px solid var(--border-gray);
+      border-radius: 20px;
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .nav-tab.active {
+      background: var(--primary-orange);
+      color: white;
+      border-color: var(--primary-orange);
+    }
+    .nav-tab:hover:not(.active) {
+      background: #f8f9fa;
+      border-color: #ccd0d8;
+    }
+
+    /* MAIN CONTAINER SPLIT */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      padding: 16px 20px;
+      gap: 20px;
+    }
+
+    /* LEFT PANE: WHATSAPP SIMULATOR */
+    .phone-container {
+      width: 380px;
+      min-width: 380px;
+      background: #111;
+      border-radius: 36px;
+      padding: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-screen {
+      flex: 1;
+      background: var(--wa-chat-bg);
+      border-radius: 26px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .phone-notch {
+      height: 18px;
+      background: black;
+      width: 140px;
+      margin: 0 auto;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      z-index: 10;
+    }
+    .wa-header {
+      background: var(--wa-dark-green);
+      color: white;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .wa-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--wa-dark-green);
+      position: relative;
+      font-size: 0.9rem;
+    }
+    .wa-avatar-badge {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 13px;
+      height: 13px;
+      background: #00a884;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      color: white;
+    }
+    .wa-header-info {
+      flex: 1;
+    }
+    .wa-header-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .verified-icon {
+      color: #00a884;
+      font-size: 13px;
+    }
+    .wa-header-status {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+
+    /* CHAT MESSAGES */
+    .wa-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg-bubble {
+      max-width: 82%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      position: relative;
+      word-break: break-word;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+    }
+    .msg-in {
+      align-self: flex-start;
+      background: var(--wa-bubble-in);
+      border-top-left-radius: 0;
+    }
+    .msg-out {
+      align-self: flex-end;
+      background: var(--wa-bubble-out);
+      border-top-right-radius: 0;
+    }
+    .msg-time {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      float: right;
+      margin-top: 4px;
+      margin-left: 8px;
+    }
+    .quick-replies {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .qr-button {
+      background: white;
+      border: 1px solid #d1d7db;
+      color: #00a884;
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .qr-button:hover {
+      background: #f0fdf9;
+      border-color: #00a884;
+    }
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 8px;
+      width: fit-content;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: #999;
+      border-radius: 50%;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+    /* FOOTER INPUT */
+    .wa-footer {
+      background: #f0f2f5;
+      padding: 8px 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .wa-input {
+      flex: 1;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 20px;
+      background: white;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .wa-send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #00a884;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* PRESET BUTTONS FOR FAST DEMO */
+    .demo-presets {
+      padding: 8px;
+      background: #e9edef;
+      border-top: 1px solid #d1d7db;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-chip {
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #ccd0d8;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .preset-chip.chip-success { border-color: #107c41; color: #107c41; }
+    .preset-chip.chip-error { border-color: #c42b1c; color: #c42b1c; }
+
+    /* BUTTONS */
+    .btn-reset {
+      background: #edf0f2;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-reset:hover { background: #dcdfe3; }
+
+    .btn-action-wa {
+      background: #00a884;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .btn-action-wa:hover { background: #028f6f; }
+
+    .btn-new-chat {
+      background: var(--primary-orange);
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-new-chat:hover { background: #e05214; }
+
+    /* RIGHT PANE: WORKBENCH TABS */
+    .right-pane {
+      flex: 1;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--border-gray);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .pane-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* CUSTOMER 360 CONTEXT VIEW (PEOPLE CDP & CONVERSATIONS) */
+    .cdp-workbench {
+      display: flex;
+      height: 100%;
+      border: 1px solid var(--border-gray);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .agent-queue {
+      width: 250px;
+      border-right: 1px solid var(--border-gray);
+      background: #fafbfc;
+      display: flex;
+      flex-direction: column;
+    }
+    .queue-title {
+      padding: 12px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .queue-item {
+      padding: 12px;
+      border-bottom: 1px solid #edf0f2;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .queue-item.active {
+      background: #fff3ed;
+      border-left: 3px solid var(--primary-orange);
+    }
+    .queue-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+    .queue-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+    }
+    .queue-preview {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* EXPANDED CUSTOMER 360 CARD */
+    .customer-card-expanded {
+      flex: 1;
+      background: white;
+      padding: 24px 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .customer-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-gray);
+    }
+    .customer-profile-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .profile-avatar-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #fff3ed;
+      color: var(--primary-orange);
+      border: 2px solid var(--primary-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+    .profile-name-text {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .profile-phone-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* GRID SECTIONS */
+    .cdp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .cdp-box {
+      border: 1px solid var(--border-gray);
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafbfc;
+    }
+    .box-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-vip { background: #e6f4ea; color: #137333; }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e9ecef;
+    }
+    .data-row:last-child {
+      border-bottom: none;
+    }
+    .data-label { color: var(--text-muted); }
+    .data-val { font-weight: 600; color: var(--primary-dark); }
+
+    .tag-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .routing-tag {
+      font-size: 0.75rem;
+      background: #f0f2f5;
+      color: #333;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #dcdfe3;
+      font-weight: 500;
+    }
+
+    /* TECHNICAL TRACE VIEW */
+    .trace-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .trace-step {
+      border: 1px solid var(--border-gray);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fafbfc;
+      transition: all 0.2s;
+    }
+    .trace-step.trace-active {
+      border-color: var(--primary-orange);
+      background: #fffcfb;
+      box-shadow: 0 2px 8px rgba(252, 100, 35, 0.1);
+    }
+    .trace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .trace-status {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .status-ok { background: #e6f4ea; color: #137333; }
+    .status-wait { background: #fef7e0; color: #b06000; }
+    .status-error { background: #fde8e8; color: #9b1c1c; }
+    .code-box {
+      margin-top: 8px;
+      background: #282c34;
+      color: #abb2bf;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      overflow-x: auto;
+    }
+
+    /* ANALYTICS VIEW */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: white;
+      border: 1px solid var(--border-gray);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #FC6423, #FCA771);
+    }
+    .kpi-card:nth-child(2)::before {
+      background: linear-gradient(90deg, #1b2f96, #9EB2FF);
+    }
+    .kpi-icon {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .kpi-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 3rem; font-weight: 800; color: var(--primary-dark); margin: 8px 0 4px; line-height: 1; }
+    .kpi-trend { font-size: 0.82rem; color: #137333; font-weight: 600; margin-top: 8px; }
+
+    .chart-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .chart-box {
+      background: white;
+      border: 1px solid var(--border-gray);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .chart-title { font-size: 0.88rem; font-weight: 700; margin-bottom: 12px; }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+    }
+    .bar-label { width: 140px; color: var(--text-muted); }
+    .bar-fill {
+      height: 16px;
+      background: var(--primary-orange);
+      border-radius: 4px;
+    }
+    .bar-val { font-weight: 600; width: 45px; }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 1200px) {
+      .cdp-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 1100px) {
+      body { height: auto; min-height: 100vh; overflow-y: auto; }
+      main { flex-direction: column; overflow: visible; align-items: center; }
+      .phone-container { width: 100%; max-width: 420px; height: 720px; min-width: unset; }
+      .right-pane { width: 100%; min-height: 700px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP APP BAR -->
+  <header>
+    <div class="header-left">
+      <div class="brand-badge">
+        <svg width="95" height="28" viewBox="0 0 1011 301" fill="none" xmlns="http://www.w3.org/2000/svg" style="background:transparent; height:28px; width:95px; display:block;">
+          <path d="M471.165 97.2653C457.54 97.2653 446.565 101.74 438.24 110.69L433.765 99.7153H405.29V200.365H441.065V146.49C441.065 134.49 448.59 126.565 459.765 126.565C468.915 126.565 475.615 133.465 475.615 142.64V200.39H511.39V136.74C511.39 125.14 507.74 115.79 500.215 108.465C492.69 100.94 483.14 97.2903 471.14 97.2903L471.165 97.2653Z" fill="#FC6423"/>
+          <path d="M385.965 53.19H350.19V88.965H385.965V53.19Z" fill="#FC6423"/>
+          <path d="M385.965 99.7154H350.19V200.365H385.965V99.7154Z" fill="#FC6423"/>
+          <path d="M996.99 112.09C988.24 102.165 977.065 97.2905 963.44 97.2905C951.215 97.2905 941.265 101.14 933.515 109.04L929.015 99.6905H900.59V242.665H936.34V193.24C944.29 199.54 953.215 202.815 963.415 202.815C977.04 202.815 988.215 197.89 996.965 188.165C1005.67 178.165 1010.17 165.565 1010.17 150.115C1010.17 134.665 1005.67 121.84 996.965 112.065L996.99 112.09ZM953.865 174.715C943.065 174.715 935.765 166.59 935.765 155.44V144.865C935.765 133.49 943.09 125.365 953.865 125.365C965.465 125.365 973.79 135.515 973.79 150.165C973.79 164.815 965.465 174.74 953.865 174.74V174.715Z" fill="#FC6423"/>
+          <path d="M863.365 52.74C851.765 52.74 843.04 61.29 843.04 73.265C843.04 85.24 851.79 93.59 863.365 93.59C875.565 93.59 883.89 84.84 883.89 73.265C883.89 61.69 875.565 52.74 863.365 52.74Z" fill="#FC6423"/>
+          <path d="M881.265 99.7154H845.49V200.365H881.265V99.7154Z" fill="#FC6423"/>
+          <path d="M696.24 112.09C685.665 102.165 671.815 97.2905 654.99 97.2905C638.165 97.2905 624.49 102.14 613.69 112.09C602.89 122.09 597.615 134.69 597.615 150.14C597.615 165.59 602.915 178.19 613.69 188.19C624.49 197.915 638.115 202.84 654.99 202.84C671.865 202.84 685.665 197.915 696.24 188.19C707.04 178.19 712.315 165.59 712.315 150.14C712.315 134.69 707.015 121.865 696.24 112.09ZM654.99 175.14C642.765 175.14 634.215 164.765 634.215 150.14C634.215 135.515 642.765 124.915 654.99 124.915C667.215 124.915 675.94 135.29 675.94 150.14C675.94 164.99 667.19 175.14 654.99 175.14Z" fill="#FC6423"/>
+          <path d="M582.99 83.2405C586.24 83.2405 590.115 83.6405 594.79 84.4655L599.265 58.0405C590.94 55.7905 582.59 54.7905 574.265 54.7905C563.09 54.7905 553.94 58.0405 546.815 64.5405C539.89 71.0405 536.44 79.5905 536.44 90.3655V99.7155H519.565V126.765H536.44V200.365H572.215V126.765H592.965V99.7155H572.215V94.0155C572.215 87.3155 576.49 83.2405 582.99 83.2405Z" fill="#FC6423"/>
+          <path d="M819.24 112.09C810.54 102.165 799.315 97.29 785.69 97.29C775.315 97.29 766.415 100.49 758.665 106.79V57.215H722.865V200.34H751.34L755.84 190.99C763.54 198.89 773.515 202.79 785.715 202.79C799.34 202.79 810.565 197.865 819.265 188.14C828.015 178.14 832.515 165.54 832.515 150.09C832.515 134.64 828.015 121.815 819.265 112.04L819.24 112.09ZM776.19 174.715C765.39 174.715 758.09 166.59 758.09 155.44V144.865C758.09 133.49 765.415 125.365 776.19 125.365C787.74 125.365 796.065 135.515 796.065 150.165C796.065 164.815 787.74 174.74 776.19 174.74V174.715Z" fill="#FC6423"/>
+          <path d="M236.065 236.065C219.64 252.465 187.565 262.24 150.19 262.24C112.815 262.24 80.69 252.465 64.34 236.065C47.94 219.64 38.115 187.565 38.115 150.19C38.115 112.815 47.94 80.74 64.34 64.34C80.715 47.915 112.84 38.115 150.19 38.115C187.54 38.115 219.64 47.94 236.065 64.34C252.415 80.765 262.24 112.84 262.24 150.19C262.24 187.54 252.415 219.64 236.065 236.065ZM300.165 150.165C300.19 67.34 233.015 0.190002 150.19 0.190002C67.365 0.190002 0.190002 67.34 0.190002 150.19C0.190002 233.04 67.34 300.19 150.19 300.19C233.04 300.19 300.19 233.04 300.19 150.19L300.165 150.165Z" fill="#FC6423"/>
+          <path d="M180.19 128.99V171.34C180.19 176.24 176.24 180.165 171.415 180.165H128.965C124.115 180.165 120.19 176.24 120.19 171.34V128.99C120.19 124.09 124.115 120.165 128.965 120.165H171.415C176.24 120.165 180.19 124.09 180.19 128.99Z" fill="#FC6423"/>
+          <path d="M220.915 79.44C209.215 67.74 181.465 60.19 150.165 60.19C118.89 60.19 91.1148 67.765 79.4148 79.44C67.6648 91.115 60.1648 118.915 60.1648 150.19C60.1648 181.465 67.6648 209.265 79.4148 220.94C91.1148 232.615 118.865 240.19 150.165 240.19C181.44 240.19 209.215 232.615 220.915 220.94C232.665 209.24 240.165 181.465 240.165 150.19C240.165 118.915 232.665 91.115 220.915 79.44ZM193.59 193.29C191.14 195.74 183.715 203.165 149.965 203.165C116.215 203.165 108.74 195.765 106.34 193.29C103.89 190.84 96.4648 183.415 96.4648 149.69C96.4648 115.965 103.865 108.54 106.34 106.09C108.74 103.64 116.165 96.265 149.965 96.265C183.765 96.265 191.14 103.615 193.59 106.09C196.015 108.54 203.415 115.965 203.415 149.69C203.415 183.415 196.015 190.84 193.59 193.29Z" fill="#FC6423"/>
+        </svg>
+      </div>
+      <div class="divider-v"></div>
+      <div class="header-title">
+        <strong>Banco IB:</strong> Integrated WhatsApp Chatbot & Core Banking Solution
+      </div>
+    </div>
+
+    <div class="header-tabs">
+      <button class="nav-tab active" onclick="switchTab('tab-agent', this)">
+        👤 Customer 360 Context (People CDP & Conversations)
+      </button>
+      <button class="nav-tab" onclick="switchTab('tab-traces', this)">
+        🔍 Technical Traces (Answers & Core API)
+      </button>
+      <button class="nav-tab" onclick="switchTab('tab-analytics', this)">
+        📊 Analytics & Operational KPIs
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SPLIT WORKBENCH -->
+  <main>
+    <!-- LEFT PANE: WHATSAPP PHONE SIMULATOR -->
+    <div class="phone-container">
+      <div class="phone-screen">
+        <div class="phone-notch"></div>
+        <div class="wa-header">
+          <div class="wa-avatar">
+            IB
+            <div class="wa-avatar-badge">✓</div>
+          </div>
+          <div class="wa-header-info">
+            <div class="wa-header-name">
+              Banco IB
+              <span class="verified-icon">✓</span>
+            </div>
+            <div class="wa-header-status" id="waStatus">Official business account</div>
+            <span id="tagHandoff" style="font-size:0.68rem; font-weight:600; background:#f0f2f5; color:#333; padding:2px 8px; border-radius:10px; margin-top:3px; display:inline-block;">#Status_BotActive</span>
+          </div>
+          <button class="btn-action-wa" onclick="startNewCustomerSession()" title="Simulate another customer joining WhatsApp">+ New Customer</button>
+          <button class="btn-reset" onclick="resetAllDemo()" title="Reset all test sessions">🔄 Reset</button>
+        </div>
+
+        <!-- CHAT MESSAGE FEED -->
+        <div class="wa-body" id="waChatBody">
+          <!-- Populated dynamically by js/app.js -->
+        </div>
+
+        <!-- QUICK PRESET SHORTCUTS (FOR FAST 1-CLICK DEMO IN INTERVIEW) -->
+        <div class="demo-presets">
+          <span style="font-size:0.68rem; color:#666; width:100%; margin-bottom:2px;">Quick test shortcuts for live demo:</span>
+          <button class="preset-chip chip-success" onclick="presetCPF('52998224725')">✔ Valid CPF (52998224725)</button>
+          <button class="preset-chip chip-error" onclick="presetCPF('111.111.111-11')">✖ Repeated (111...)</button>
+          <button class="preset-chip chip-error" onclick="presetCPF('52998224720')">✖ Wrong Check Digit</button>
+        </div>
+
+        <!-- INPUT BAR -->
+        <div class="wa-footer">
+          <input type="text" id="waInput" class="wa-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+          <button class="wa-send-btn" onclick="sendUserMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANE: WORKBENCH -->
+    <div class="right-pane">
+      <!-- TAB 1: CUSTOMER 360 CONTEXT (PEOPLE CDP & CONVERSATIONS QUEUE) -->
+      <div id="tab-agent" class="pane-content" style="padding:0; height:100%; display:block;">
+        <div class="cdp-workbench">
+          <!-- QUEUE LIST -->
+          <div class="agent-queue">
+            <div class="queue-title" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Active Queues</span>
+              <button class="btn-new-chat" onclick="startNewCustomerSession()" title="Start a new customer session">+ New</button>
+            </div>
+            <div id="queueListContainer" style="overflow-y: auto; flex: 1;">
+              <!-- Populated dynamically with customer sessions -->
+            </div>
+          </div>
+
+          <!-- EXPANDED CUSTOMER 360 CARD -->
+          <div class="customer-card-expanded">
+            <!-- PROFILE HEADER -->
+            <div class="customer-card-header">
+              <div class="customer-profile-main">
+                <div class="profile-avatar-circle" id="cardAvatar">IB</div>
+                <div>
+                  <div class="profile-name-text" id="cardName">Customer #1</div>
+                  <div class="profile-phone-text">
+                    <span id="cardPhone">+55 11 98765-4321</span> &bull; 
+                    <span style="color:#00a884; font-weight:600;">WhatsApp Verified</span> &bull;
+                    <span id="cardSessionStatus" style="font-weight:600; color:var(--primary-orange);">Bot Handling</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <span class="card-badge" id="cardTierBadge" style="background:#eee; color:#555;">PENDING</span>
+              </div>
+            </div>
+
+            <!-- TWO-COLUMN GRID OF VERIFIED DATA -->
+            <div class="cdp-grid">
+              <!-- BLOCK 1: CORE BANKING & CREDIT RISK -->
+              <div class="cdp-box">
+                <div class="box-title">
+                  <span>Core Banking & Credit Scoring</span>
+                  <span style="font-size:0.7rem; color:var(--primary-orange);">REST API Webhook</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Credit Score:</span>
+                  <span class="data-val" id="cardScore">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Client Tier:</span>
+                  <span class="data-val" id="cardTierVal">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Existing Account:</span>
+                  <span class="data-val" id="cardAccount">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Endpoint:</span>
+                  <span class="data-val" style="font-size:0.75rem; font-family:monospace;">/validate-cpf</span>
+                </div>
+              </div>
+
+              <!-- BLOCK 2: IDENTITY & EDGE VALIDATION -->
+              <div class="cdp-box">
+                <div class="box-title">
+                  <span>Identity & Edge Verification</span>
+                  <span style="font-size:0.7rem; color:#107c41;">Modulo 11 (JS)</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">CPF Document:</span>
+                  <span class="data-val" id="cardCPF">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Modulo 11 Check:</span>
+                  <span class="data-val" id="cardMod11">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Verified Email:</span>
+                  <span class="data-val" id="cardEmail">—</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Handoff SLA:</span>
+                  <span class="data-val" style="color:#107c41;">< 1.5s Target</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: TECHNICAL TRACES -->
+      <div id="tab-traces" class="pane-content" style="display:none;">
+        <div style="font-size:1.05rem; font-weight:700; color:var(--primary-dark); margin-bottom:16px;">
+          🛠️ Execution Traces: Edge Logic & Core Banking API Integration
+        </div>
+        <div class="trace-container">
+          <div class="trace-step trace-active" id="traceStep1">
+            <div class="trace-header">
+              <span>1. Inbound Ingestion & Regex Syntax Filter (Infobip Answers Edge)</span>
+              <span class="trace-status status-wait" id="trace1Status">Awaiting input...</span>
+            </div>
+            <div class="code-box" id="trace1Code">// Syntax Validation Regex: /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/
+// Awaiting customer input from WhatsApp...</div>
+          </div>
+
+          <div class="trace-step" id="traceStep2">
+            <div class="trace-header">
+              <span>2. JavaScript Modulo 11 Algorithm (DV1 and DV2 Computation)</span>
+              <span class="trace-status status-wait" id="trace2Status">Pending</span>
+            </div>
+            <div class="code-box" id="trace2Code">// Mathematical Verification:
+// sum1 = d1*10 + d2*9 + ... + d9*2
+// rest1 = sum1 % 11; DV1 = rest1 < 2 ? 0 : 11 - rest1</div>
+          </div>
+
+          <div class="trace-step" id="traceStep3">
+            <div class="trace-header">
+              <span>3. Core Banking Integration (HTTP POST Beeceptor /validate-cpf)</span>
+              <span class="trace-status status-wait" id="trace3Status">Pending</span>
+            </div>
+            <div class="code-box" id="trace3Code">// Webhook Request: POST https://banco-ib-cpf-validation.free.beeceptor.com/validate-cpf
+// Body: { "cpf": "...", "channel": "WHATSAPP" }</div>
+          </div>
+
+          <div class="trace-step" id="traceStep4">
+            <div class="trace-header">
+              <span>4. Contextual Human Handoff (Infobip Conversations & People CDP)</span>
+              <span class="trace-status status-wait" id="trace4Status">Pending</span>
+            </div>
+            <div class="code-box" id="trace4Code">// Handoff Trigger: Answers -> Route to Queue 'VIP_Onboarding_Queue'
+// Injected Context: { fullName, cpf, email, creditScore, tier: 'PREMIUM' }</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ANALYTICS -->
+      <div id="tab-analytics" class="pane-content" style="display:none;">
+        <div style="font-size:1.05rem; font-weight:700; color:var(--primary-dark); margin-bottom:16px;">
+          📊 Operational Results & Analytics Dashboard (Infobip Analytics)
+        </div>
+        
+        <div class="analytics-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-title">Avg. Response Time</div>
+            <div class="kpi-value" id="kpiResponseTime">0.8s</div>
+            <div class="kpi-trend">▼ 22x faster than human agent</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">👥</div>
+            <div class="kpi-title">Active Sessions</div>
+            <div class="kpi-value" id="kpiConcurrentSessions">1</div>
+            <div class="kpi-trend">▲ Max capacity: 10,000+ concurrent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODULAR JAVASCRIPT LOGIC -->
+  <script src="js/cpfValidator.js"></script>
+  <script src="js/mockApi.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

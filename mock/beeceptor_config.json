@@ -1,0 +1,49 @@
+{
+  "endpoint": "/validate-cpf",
+  "method": "POST",
+  "description": "Mock API for CPF validation and credit risk profiling for Banco IB clients",
+  "mock_provider": "Beeceptor (https://beeceptor.com)",
+  "live_url": "https://banco-ib-cpf-validation.free.beeceptor.com/validate-cpf",
+  "request_sample": {
+    "cpf": "52998224725",
+    "channel": "WHATSAPP",
+    "timestamp": "2026-11-07T13:55:00Z"
+  },
+  "response": {
+    "status": "APPROVED",
+    "score": 820,
+    "client_tier": "PREMIUM",
+    "account_exists": true,
+    "message": "CPF validated successfully in Banco IB Core Banking"
+  },
+  "alternate_responses": {
+    "rejected_low_score": {
+      "status": "REJECTED",
+      "score": 340,
+      "client_tier": "STANDARD",
+      "account_exists": true,
+      "message": "CPF with active credit restrictions"
+    },
+    "not_found": {
+      "status": "NOT_FOUND",
+      "score": 0,
+      "client_tier": "NEW_PROSPECT",
+      "account_exists": false,
+      "message": "Client not registered in Banco IB database"
+    }
+  },
+  "infobip_integration": {
+    "element_type": "Webhook / Web Service",
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Partner-Id": "INFOBIP-SOLUTIONS-ENGINEERING"
+    },
+    "body_template": "{\n  \"cpf\": \"{{attribute.cpf}}\",\n  \"channel\": \"WHATSAPP\"\n}",
+    "response_mapping": {
+      "attribute.cpf_status": "response.body.status",
+      "attribute.credit_score": "response.body.score",
+      "attribute.client_tier": "response.body.client_tier"
+    }
+  }
+}
